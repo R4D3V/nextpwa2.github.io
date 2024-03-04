@@ -1,4 +1,6 @@
-export default function Home() {
+import React from "react";
+
+function page() {
   return (
     <div>
       <p>
@@ -19,3 +21,5 @@ export default function Home() {
     </div>
   );
 }
+
+export default page;

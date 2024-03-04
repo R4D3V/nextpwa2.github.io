@@ -1,6 +1,7 @@
-export default function Home() {
+function page() {
   return (
     <div>
+      {" "}
       <p>
         Welcome to [Your Company Name] - Unearth the Beauty of Pure Gold
         Discover the allure of gold with [Your Company Name], a distinguished
@@ -19,3 +20,5 @@ export default function Home() {
     </div>
   );
 }
+
+export default page;
