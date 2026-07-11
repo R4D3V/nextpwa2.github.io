@@ -13,6 +13,7 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+  serverExternalPackages: ["@neondatabase/serverless"],
 };
 
 export default nextConfig;

@@ -3,8 +3,21 @@ import { neon } from "@neondatabase/serverless";
 
 const sql = neon(process.env.DATABASE_URL!);
 
+async function ensureTable() {
+  await sql`
+    CREATE TABLE IF NOT EXISTS gallery_images (
+      id TEXT PRIMARY KEY,
+      title TEXT NOT NULL,
+      description TEXT NOT NULL DEFAULT '',
+      image TEXT NOT NULL,
+      created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+    )
+  `;
+}
+
 export async function GET() {
   try {
+    await ensureTable();
     const rows = await sql`
       SELECT id, title, description, image, created_at
       FROM gallery_images
@@ -19,6 +32,7 @@ export async function GET() {
 
 export async function POST(req: NextRequest) {
   try {
+    await ensureTable();
     const { title, description, image } = await req.json();
     if (!title || !image) {
       return NextResponse.json({ error: "title and image are required" }, { status: 400 });
@@ -37,6 +51,7 @@ export async function POST(req: NextRequest) {
 
 export async function DELETE(req: NextRequest) {
   try {
+    await ensureTable();
     const { id } = await req.json();
     if (!id) {
       return NextResponse.json({ error: "id is required" }, { status: 400 });

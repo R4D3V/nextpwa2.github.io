@@ -111,7 +111,10 @@ export function seedListings(
 export async function getGalleryImages(): Promise<GalleryImage[]> {
   try {
     const res = await fetch("/api/gallery");
-    if (!res.ok) return [];
+    if (!res.ok) {
+      console.error("getGalleryImages failed:", res.status, await res.text());
+      return [];
+    }
     const data = await res.json();
     return data.map((r: Record<string, string>) => ({
       id: r.id,
@@ -120,7 +123,8 @@ export async function getGalleryImages(): Promise<GalleryImage[]> {
       image: r.image,
       createdAt: r.created_at,
     }));
-  } catch {
+  } catch (err) {
+    console.error("getGalleryImages error:", err);
     return [];
   }
 }
@@ -132,9 +136,13 @@ export async function addGalleryImage(data: Omit<GalleryImage, "id" | "createdAt
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(data),
     });
-    if (!res.ok) return null;
+    if (!res.ok) {
+      console.error("addGalleryImage failed:", res.status, await res.text());
+      return null;
+    }
     return res.json();
-  } catch {
+  } catch (err) {
+    console.error("addGalleryImage error:", err);
     return null;
   }
 }
@@ -146,8 +154,10 @@ export async function deleteGalleryImage(id: string): Promise<boolean> {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ id }),
     });
+    if (!res.ok) console.error("deleteGalleryImage failed:", res.status, await res.text());
     return res.ok;
-  } catch {
+  } catch (err) {
+    console.error("deleteGalleryImage error:", err);
     return false;
   }
 }
