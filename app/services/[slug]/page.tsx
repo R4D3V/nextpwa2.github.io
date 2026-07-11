@@ -56,45 +56,47 @@ export default async function ServiceDetailPage({
       </section>
 
       <Reveal>
-        <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
-          <div className="relative h-64 w-full overflow-hidden rounded-2xl sm:h-96">
-            <Image
-              src={service.image}
-              alt={service.name}
-              fill
-              sizes="(max-width: 768px) 100vw, 896px"
-              className="object-cover"
-              priority
-            />
+        <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+          <div className="flex flex-col gap-8 md:flex-row md:items-start">
+            <div className="relative h-64 w-full shrink-0 overflow-hidden rounded-2xl sm:h-96 md:w-1/2">
+              <Image
+                src={service.image}
+                alt={service.name}
+                fill
+                sizes="(max-width: 768px) 100vw, 50vw"
+                className="object-cover"
+                priority
+              />
+            </div>
+
+            <div className="flex flex-col gap-6 md:w-1/2">
+              <Reveal direction="left">
+                <div className="neu-raised space-y-5 p-8 sm:p-10">
+                  {service.description.map((paragraph, i) => (
+                    <p key={i} className="text-base leading-relaxed text-mist">
+                      {paragraph}
+                    </p>
+                  ))}
+                </div>
+              </Reveal>
+
+              <Reveal direction="right" delay={100}>
+                <div className="neu-card p-8">
+                  <h2 className="font-display text-2xl text-navy">What's included</h2>
+                  <ul className="mt-5 space-y-3">
+                    {service.bullets.map((bullet) => (
+                      <li key={bullet} className="arrow-bullet text-sm text-ink">
+                        {bullet}
+                      </li>
+                    ))}
+                  </ul>
+                  <InquireButton serviceName={service.name} serviceSlug={service.slug} />
+                </div>
+              </Reveal>
+            </div>
           </div>
         </div>
       </Reveal>
-
-      <section className="mx-auto flex max-w-full flex-col items-center px-4 sm:px-6 py-10 lg:px-8">
-          <Reveal direction="left">
-            <div className="neu-raised space-y-5 p-8 sm:p-10">
-              {service.description.map((paragraph, i) => (
-                <p key={i} className="text-base leading-relaxed text-mist">
-                  {paragraph}
-                </p>
-              ))}
-            </div>
-          </Reveal>
-
-          <Reveal direction="right" delay={100}>
-            <div className="neu-card p-8">
-              <h2 className="font-display text-2xl text-navy">What's included</h2>
-              <ul className="mt-5 space-y-3">
-                {service.bullets.map((bullet) => (
-                  <li key={bullet} className="arrow-bullet text-sm text-ink">
-                    {bullet}
-                  </li>
-                ))}
-              </ul>
-              <InquireButton serviceName={service.name} serviceSlug={service.slug} />
-            </div>
-          </Reveal>
-      </section>
 
       <Section eyebrow="Get started" title="Tell us what you need" className="pt-4!">
         <div className="mx-auto max-w-xl">
