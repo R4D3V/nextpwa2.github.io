@@ -17,7 +17,12 @@ import {
 } from "@/lib/data";
 import { getListings, AdminLandListing } from "@/lib/admin-store";
 
-const phrases = ["Best Deals", "Best Offers", "Pure Commitment", "Best Service"];
+const phrases = [
+  "Best Deals",
+  "Best Offers",
+  "Pure Commitment",
+  "Best Service",
+];
 
 export default function Home() {
   const [featuredLand, setFeaturedLand] = useState<AdminLandListing[]>([]);
@@ -84,7 +89,7 @@ export default function Home() {
               Land services · {contact.location}
             </p>
             <h1 className="mt-6 font-display text-4xl leading-[1.05] text-navy sm:text-6xl lg:text-7xl">
-              <span className="text-red">Frank Realtors</span>{" "}
+              {/* <span className="text-red">Realtors</span>{" "} */}
               <span className="inline-block min-w-[6ch] text-left">
                 {phrases[phraseIndex].slice(0, charIndex)}
                 <span className="animate-pulse">|</span>
