@@ -10,7 +10,7 @@ export default function AdminDashboard() {
 
   useEffect(() => {
     setListingCount(getListings().length);
-    setGalleryCount(getGalleryImages().length);
+    getGalleryImages().then((imgs) => setGalleryCount(imgs.length));
   }, []);
 
   return (

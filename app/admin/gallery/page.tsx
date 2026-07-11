@@ -11,7 +11,7 @@ export default function AdminGalleryPage() {
   const [preview, setPreview] = useState<string | null>(null);
 
   useEffect(() => {
-    setImages(getGalleryImages());
+    getGalleryImages().then(setImages);
   }, []);
 
   function handleFileChange(f: File | null) {
@@ -22,12 +22,12 @@ export default function AdminGalleryPage() {
     reader.readAsDataURL(f);
   }
 
-  function handleUpload() {
+  async function handleUpload() {
     if (!file || !title) return;
     const reader = new FileReader();
-    reader.onload = () => {
-      addGalleryImage({ title, description, image: reader.result as string });
-      setImages(getGalleryImages());
+    reader.onload = async () => {
+      await addGalleryImage({ title, description, image: reader.result as string });
+      setImages(await getGalleryImages());
       setTitle("");
       setDescription("");
       setFile(null);
@@ -36,10 +36,10 @@ export default function AdminGalleryPage() {
     reader.readAsDataURL(file);
   }
 
-  function handleDelete(id: string) {
+  async function handleDelete(id: string) {
     if (!confirm("Delete this image?")) return;
-    deleteGalleryImage(id);
-    setImages(getGalleryImages());
+    await deleteGalleryImage(id);
+    setImages(await getGalleryImages());
   }
 
   return (

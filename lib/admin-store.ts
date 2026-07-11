@@ -108,21 +108,46 @@ export function seedListings(
   return count;
 }
 
-export function getGalleryImages(): GalleryImage[] {
-  if (typeof window === "undefined") return [];
-  const raw = localStorage.getItem(GALLERY_KEY);
-  return raw ? JSON.parse(raw) : [];
+export async function getGalleryImages(): Promise<GalleryImage[]> {
+  try {
+    const res = await fetch("/api/gallery");
+    if (!res.ok) return [];
+    const data = await res.json();
+    return data.map((r: Record<string, string>) => ({
+      id: r.id,
+      title: r.title,
+      description: r.description,
+      image: r.image,
+      createdAt: r.created_at,
+    }));
+  } catch {
+    return [];
+  }
 }
 
-export function addGalleryImage(data: Omit<GalleryImage, "id" | "createdAt">): GalleryImage {
-  const images = getGalleryImages();
-  const img: GalleryImage = { ...data, id: genId(), createdAt: new Date().toISOString() };
-  images.push(img);
-  localStorage.setItem(GALLERY_KEY, JSON.stringify(images));
-  return img;
+export async function addGalleryImage(data: Omit<GalleryImage, "id" | "createdAt">): Promise<GalleryImage | null> {
+  try {
+    const res = await fetch("/api/gallery", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data),
+    });
+    if (!res.ok) return null;
+    return res.json();
+  } catch {
+    return null;
+  }
 }
 
-export function deleteGalleryImage(id: string) {
-  const images = getGalleryImages().filter((i) => i.id !== id);
-  localStorage.setItem(GALLERY_KEY, JSON.stringify(images));
+export async function deleteGalleryImage(id: string): Promise<boolean> {
+  try {
+    const res = await fetch("/api/gallery", {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id }),
+    });
+    return res.ok;
+  } catch {
+    return false;
+  }
 }

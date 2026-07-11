@@ -10,7 +10,7 @@ export default function GalleryPage() {
   const [lightbox, setLightbox] = useState<GalleryImage | null>(null);
 
   useEffect(() => {
-    setImages(getGalleryImages());
+    getGalleryImages().then(setImages);
   }, []);
 
   return (
