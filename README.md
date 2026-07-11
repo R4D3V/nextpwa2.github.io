@@ -1,36 +1,91 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# Frank Realtors — Website
 
-## Getting Started
+Built with **Next.js 16** (App Router) and **Tailwind CSS 4.3**, in a soft
+neumorphic style matching the reference design at raymonjohns.vercel.app.
+Headings and the logo wordmark use a cursive display font (Dancing Script);
+body copy uses Poppins.
 
-First, run the development server:
+## Getting started
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open http://localhost:3000.
 
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
+To build for production:
 
-This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
+```bash
+npm run build
+npm start
+```
 
-## Learn More
+## Structure
 
-To learn more about Next.js, take a look at the following resources:
+- `app/page.tsx` — Home
+- `app/services/page.tsx` — Services overview
+- `app/services/[slug]/page.tsx` — One statically-generated page per service
+  (Estate Development, Surveying, Land Documentation, Land Settlement, Farm
+  Management, Construction, Compound Design)
+- `app/land/page.tsx` — All land listings from the flyer, with prices
+- `app/contact/page.tsx` — Contact info + form
+- `lib/data.ts` — All services, land listings, and contact details in one
+  place — edit here to add/remove services or update prices
+- `components/` — Header, Footer, ContactForm, ServiceCard, Section
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## WhatsApp contact form
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
+`components/ContactForm.tsx` builds a `wa.me` link from the form fields and
+opens it in a new tab/app with the message pre-filled. No backend or email
+service is required. The number used is set in `lib/data.ts`
+(`contact.phoneDigits`).
 
-## Deploy on Vercel
+## Editing content
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+- **Services**: edit the `services` array in `lib/data.ts`. Each entry
+  automatically gets its own page at `/services/[slug]`.
+- **Land listings & prices**: edit the `landListings` array in `lib/data.ts`
+  (`rawListings`). Each entry automatically gets its own page at
+  `/land/[slug]` with a photo gallery, description, and feature list.
+- **Contact details**: edit the `contact` object in `lib/data.ts`.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+## Logo & favicon
+
+`public/logo.png` is an upscaled version of the uploaded logo (4x
+Lanczos resampling + sharpening — there's no true AI super-resolution model
+available in this build environment, so treat this as a clean-up rather than
+a from-scratch regeneration). `app/favicon.ico`, `public/apple-touch-icon.png`,
+and `public/icon-192.png` / `icon-512.png` were cropped from the roof mark and
+resized for each required size. If you have a higher-resolution or
+vector (SVG) version of the logo, swap it into `public/logo.png` and
+regenerate the icon files for a sharper result.
+
+## Land listing photos
+
+Each `/land/[slug]` page shows a 5-photo gallery. All listings currently
+share the same 5 real site photos (`public/land/plot-1.png` through
+`plot-5.png`), set in `galleryFor()` in `lib/data.ts`. **Swap in different
+photos per listing whenever you're ready** — just point each listing's
+`images` array at different files in `/public`.
+
+## Font
+
+Body and heading type uses **Nunito**, a rounded sans-serif, loaded via
+`next/font/google` in `app/layout.tsx`. Since `--font-display` in
+`globals.css` is just aliased to `--font-sans`, this single import swap
+updates every heading and paragraph across the site consistently.
+
+Want a different rounded feel? Swap the import for one of these (same
+one-line change in `app/layout.tsx`):
+- **Quicksand** — very round, more minimal/geometric
+- **Baloo 2** — rounder and friendlier, bolder personality
+- **Fredoka** — playful, chunky rounded terminals
+- **Comfortaa** — rounded, modern, works well for short display text
+
+## Design tokens
+
+Colors, the neumorphic shadow utilities (`.neu-card`, `.neu-raised`,
+`.neu-pressed`, `.neu-btn`, `.neu-pill`), and the signature gold arrow bullet
+(`.arrow-bullet`, echoing the flyer's arrow markers) live in
+`app/globals.css`.

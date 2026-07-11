@@ -1,33 +1,174 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
 
 :root {
-  --foreground-rgb: 0, 0, 0;
-  --background-start-rgb: 214, 219, 220;
-  --background-end-rgb: 255, 255, 255;
+  /* Height of the fixed navbar row — constant across every breakpoint since
+     the header never wraps to a second line. Used to keep page content (and
+     anchor scrolling) clear of the fixed header. */
+  --nav-h: 4.75rem;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --foreground-rgb: 255, 255, 255;
-    --background-start-rgb: 0, 0, 0;
-    --background-end-rgb: 0, 0, 0;
-  }
+html {
+  scroll-padding-top: var(--nav-h);
+}
+
+@theme {
+  /* Surface system — near-black flyer background, lifted card surfaces */
+  --color-base: #0a0a0d;
+  --color-base-light: #151519;
+  --color-base-dark: #050506;
+
+  /* Brand palette — red signature accent on dark */
+  --color-navy: #f3f1f5;
+  --color-navy-soft: #a9a6b3;
+  --color-red: #ef4444;
+  --color-red-soft: #f87171;
+  --color-gold: #e79fc6;
+  --color-ink: #dcdae2;
+  --color-mist: #8b8995;
+
+  --font-display: var(--font-heading), "Space Grotesk", sans-serif;
+}
+
+html {
+  scroll-behavior: smooth;
 }
 
 body {
-  color: rgb(var(--foreground-rgb));
-  background: linear-gradient(
-      to bottom,
-      transparent,
-      rgb(var(--background-end-rgb))
-    )
-    rgb(var(--background-start-rgb));
+  background-color: var(--color-base);
+  color: var(--color-ink);
+  font-family: var(--font-sans), "Inter", sans-serif;
+  font-weight: 400;
+  position: relative;
+  width: 100%;
+
 }
 
-@layer utilities {
-  .text-balance {
-    text-wrap: balance;
+
+
+/* Headings render in the display face, bold, tight, uppercase — the
+   flyer's heavy grotesque headline treatment */
+.font-display {
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  text-transform: uppercase;
+}
+
+::selection {
+  background: var(--color-red);
+  color: #0a0a0d;
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-red);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
   }
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ---- Flat dark surface primitives (replaces neumorphism) ---- */
+
+.neu-raised {
+  background: var(--color-base-light);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 1.5rem;
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.04) inset,
+    0 20px 40px -20px rgba(0, 0, 0, 0.6);
+}
+
+.neu-raised-sm {
+  background: var(--color-base-light);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 1rem;
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.04) inset;
+}
+
+.neu-pressed {
+  background: var(--color-base-dark);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 1rem;
+  box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.5);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.neu-pressed:focus-within {
+  border-color: rgba(239, 68, 68, 0.6);
+  box-shadow:
+    inset 0 2px 6px rgba(0, 0, 0, 0.5),
+    0 0 0 3px rgba(239, 68, 68, 0.18);
+}
+
+.neu-pill {
+  background: rgba(239, 68, 68, 0.08);
+  border: 1px solid rgba(239, 68, 68, 0.4);
+  border-radius: 999px;
+  color: var(--color-red);
+}
+
+.neu-pill:active,
+.neu-btn:active {
+  transform: translateY(1px) scale(0.99);
+}
+
+.neu-btn {
+  background: var(--color-red);
+  color: #0a0a0d !important;
+  border-radius: 999px;
+  box-shadow: 0 8px 24px -8px rgba(239, 68, 68, 0.55);
+  transition: box-shadow 0.2s ease, transform 0.2s ease, background 0.2s ease;
+}
+
+.neu-btn:hover {
+  transform: translateY(-1px);
+  background: var(--color-red-soft);
+  box-shadow: 0 12px 32px -8px rgba(239, 68, 68, 0.7);
+}
+
+.neu-card {
+  background: var(--color-base-light);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 1.25rem;
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.04) inset;
+  transition: box-shadow 0.25s ease, transform 0.25s ease, border-color 0.25s ease;
+}
+
+.neu-card:hover {
+  border-color: rgba(239, 68, 68, 0.35);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.04) inset,
+    0 16px 40px -18px rgba(239, 68, 68, 0.35);
+  transform: translateY(-3px);
+}
+
+.neu-divider {
+  height: 1px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+/* Signature bullet — the small solid pink square used as a marker
+   throughout the reference flyer (badge dot, footer bullet) */
+.arrow-bullet {
+  position: relative;
+  padding-left: 1.6rem;
+}
+
+.arrow-bullet::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0.35em;
+  width: 0.55rem;
+  height: 0.55rem;
+  border-radius: 0.15rem;
+  background: var(--color-red);
 }

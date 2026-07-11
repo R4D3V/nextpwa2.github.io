@@ -1,0 +1,128 @@
+"use client";
+
+export type AdminLandListing = {
+  slug: string;
+  name: string;
+  location: string;
+  priceLow: string;
+  priceHigh: string;
+  description: string[];
+  features: string[];
+  images: string[];
+};
+
+export type GalleryImage = {
+  id: string;
+  title: string;
+  description: string;
+  image: string;
+  createdAt: string;
+};
+
+const AUTH_KEY = "fr_admin_auth";
+const LISTINGS_KEY = "fr_land_listings";
+const GALLERY_KEY = "fr_gallery_images";
+const DEFAULT_PASSWORD = "admin123";
+
+function slugify(value: string) {
+  return value
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/(^-|-$)/g, "");
+}
+
+function genId() {
+  return Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+}
+
+export function checkAuth(): boolean {
+  if (typeof window === "undefined") return false;
+  return localStorage.getItem(AUTH_KEY) === "true";
+}
+
+export function login(password: string): boolean {
+  if (password === DEFAULT_PASSWORD) {
+    localStorage.setItem(AUTH_KEY, "true");
+    return true;
+  }
+  return false;
+}
+
+export function logout() {
+  localStorage.removeItem(AUTH_KEY);
+}
+
+export function getListings(): AdminLandListing[] {
+  if (typeof window === "undefined") return [];
+  const raw = localStorage.getItem(LISTINGS_KEY);
+  return raw ? JSON.parse(raw) : [];
+}
+
+export function getListingBySlug(slug: string): AdminLandListing | undefined {
+  return getListings().find((l) => l.slug === slug);
+}
+
+export function saveListing(data: Omit<AdminLandListing, "slug">): AdminLandListing {
+  const listings = getListings();
+  const slug = slugify(data.name);
+  const listing: AdminLandListing = { ...data, slug };
+  const idx = listings.findIndex((l) => l.slug === slug);
+  if (idx >= 0) {
+    listings[idx] = listing;
+  } else {
+    listings.push(listing);
+  }
+  localStorage.setItem(LISTINGS_KEY, JSON.stringify(listings));
+  return listing;
+}
+
+export function updateListing(slug: string, data: Partial<AdminLandListing>): AdminLandListing | undefined {
+  const listings = getListings();
+  const idx = listings.findIndex((l) => l.slug === slug);
+  if (idx < 0) return undefined;
+  listings[idx] = { ...listings[idx], ...data };
+  localStorage.setItem(LISTINGS_KEY, JSON.stringify(listings));
+  return listings[idx];
+}
+
+export function deleteListing(slug: string) {
+  const listings = getListings().filter((l) => l.slug !== slug);
+  localStorage.setItem(LISTINGS_KEY, JSON.stringify(listings));
+}
+
+export function seedListings(
+  items: Array<{ name: string; location: string; priceLow: string; priceHigh: string; description: string[]; features: string[]; images: string[] }>
+) {
+  const existing = getListings();
+  const existingSlugs = new Set(existing.map((l) => l.slug));
+  let count = 0;
+  for (const item of items) {
+    const slug = slugify(item.name);
+    if (!existingSlugs.has(slug)) {
+      existing.push({ ...item, slug });
+      existingSlugs.add(slug);
+      count++;
+    }
+  }
+  if (count > 0) localStorage.setItem(LISTINGS_KEY, JSON.stringify(existing));
+  return count;
+}
+
+export function getGalleryImages(): GalleryImage[] {
+  if (typeof window === "undefined") return [];
+  const raw = localStorage.getItem(GALLERY_KEY);
+  return raw ? JSON.parse(raw) : [];
+}
+
+export function addGalleryImage(data: Omit<GalleryImage, "id" | "createdAt">): GalleryImage {
+  const images = getGalleryImages();
+  const img: GalleryImage = { ...data, id: genId(), createdAt: new Date().toISOString() };
+  images.push(img);
+  localStorage.setItem(GALLERY_KEY, JSON.stringify(images));
+  return img;
+}
+
+export function deleteGalleryImage(id: string) {
+  const images = getGalleryImages().filter((i) => i.id !== id);
+  localStorage.setItem(GALLERY_KEY, JSON.stringify(images));
+}
