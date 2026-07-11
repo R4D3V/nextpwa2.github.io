@@ -2,19 +2,38 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { getListings, deleteListing, AdminLandListing } from "@/lib/admin-store";
+import { getListings, saveListing, deleteListing, AdminLandListing } from "@/lib/admin-store";
 
 export default function AdminListingsPage() {
   const [listings, setListings] = useState<AdminLandListing[]>([]);
 
   useEffect(() => {
-    setListings(getListings());
+    getListings().then(setListings);
   }, []);
 
-  function handleDelete(slug: string) {
+  async function handleDelete(slug: string) {
     if (!confirm("Delete this listing?")) return;
-    deleteListing(slug);
-    setListings(getListings());
+    await deleteListing(slug);
+    setListings(await getListings());
+  }
+
+  async function handleDuplicate(listing: AdminLandListing) {
+    await saveListing({
+      name: `${listing.name} (copy)`,
+      location: listing.location,
+      type: listing.type,
+      status: listing.status,
+      titleType: listing.titleType,
+      plotSize: listing.plotSize,
+      priceLow: listing.priceLow,
+      priceHigh: listing.priceHigh,
+      priceValue: listing.priceValue,
+      featured: false,
+      description: listing.description,
+      features: listing.features,
+      images: listing.images,
+    });
+    setListings(await getListings());
   }
 
   return (
@@ -62,6 +81,12 @@ export default function AdminListingsPage() {
               >
                 Edit
               </Link>
+              <button
+                onClick={() => handleDuplicate(listing)}
+                className="neu-raised-sm px-4 py-2 text-sm font-semibold text-navy"
+              >
+                Duplicate
+              </button>
               <button
                 onClick={() => handleDelete(listing.slug)}
                 className="neu-btn px-4 py-2 text-sm font-semibold text-red"

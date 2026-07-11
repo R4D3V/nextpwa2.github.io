@@ -27,6 +27,8 @@ html {
   --color-mist: #8b8995;
 
   --font-display: var(--font-heading), "Space Grotesk", sans-serif;
+  --font-sans: var(--font-sans), "Inter", sans-serif;
+  --font-bebas: var(--font-bebas), "Bebas Neue", sans-serif;
 }
 
 html {

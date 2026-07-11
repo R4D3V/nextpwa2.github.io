@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Inter, Space_Grotesk } from "next/font/google";
+import { Inter, Space_Grotesk, Bebas_Neue } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -36,16 +36,23 @@ export const metadata: Metadata = {
   manifest: "/manifest.webmanifest",
 };
 
+const bebas = Bebas_Neue({
+  subsets: ["latin"],
+  weight: "400",
+  variable: "--font-bebas",
+  display: "swap",
+});
+
 export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html
       lang="en"
-      className={`${sans.variable} ${display.variable}`}
+      className={`${sans.variable} ${display.variable} ${bebas.variable}`}
       data-scroll-behavior="smooth"
     >
-      <body className="min-h-screen antialiased">
+      <body className="min-h-screen antialiased font-sans">
         <Navbar />
         <main>{children}</main>
         <Footer />

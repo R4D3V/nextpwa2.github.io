@@ -9,7 +9,7 @@ export default function AdminDashboard() {
   const [galleryCount, setGalleryCount] = useState(0);
 
   useEffect(() => {
-    setListingCount(getListings().length);
+    getListings().then((l) => setListingCount(l.length));
     getGalleryImages().then((imgs) => setGalleryCount(imgs.length));
   }, []);
 

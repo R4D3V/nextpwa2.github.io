@@ -4,8 +4,14 @@ export type AdminLandListing = {
   slug: string;
   name: string;
   location: string;
+  type: string;
+  status: string;
+  titleType: string;
+  plotSize: string;
   priceLow: string;
   priceHigh: string;
+  priceValue: number;
+  featured: boolean;
   description: string[];
   features: string[];
   images: string[];
@@ -20,20 +26,7 @@ export type GalleryImage = {
 };
 
 const AUTH_KEY = "fr_admin_auth";
-const LISTINGS_KEY = "fr_land_listings";
-const GALLERY_KEY = "fr_gallery_images";
 const DEFAULT_PASSWORD = "admin123";
-
-function slugify(value: string) {
-  return value
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/(^-|-$)/g, "");
-}
-
-function genId() {
-  return Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
-}
 
 export function checkAuth(): boolean {
   if (typeof window === "undefined") return false;
@@ -52,60 +45,104 @@ export function logout() {
   localStorage.removeItem(AUTH_KEY);
 }
 
-export function getListings(): AdminLandListing[] {
-  if (typeof window === "undefined") return [];
-  const raw = localStorage.getItem(LISTINGS_KEY);
-  return raw ? JSON.parse(raw) : [];
+function mapRow(r: Record<string, unknown>): AdminLandListing {
+  return {
+    slug: r.slug as string,
+    name: r.name as string,
+    location: r.location as string,
+    type: (r.type as string) ?? "Residential",
+    status: (r.status as string) ?? "Available",
+    titleType: (r.title_type as string) ?? "Freehold",
+    plotSize: (r.plot_size as string) ?? "—",
+    priceLow: r.price_low as string,
+    priceHigh: r.price_high as string,
+    priceValue: (r.price_value as number) ?? 0,
+    featured: (r.featured as boolean) ?? false,
+    description: r.description as string[],
+    features: r.features as string[],
+    images: r.images as string[],
+  };
 }
 
-export function getListingBySlug(slug: string): AdminLandListing | undefined {
-  return getListings().find((l) => l.slug === slug);
-}
-
-export function saveListing(data: Omit<AdminLandListing, "slug">): AdminLandListing {
-  const listings = getListings();
-  const slug = slugify(data.name);
-  const listing: AdminLandListing = { ...data, slug };
-  const idx = listings.findIndex((l) => l.slug === slug);
-  if (idx >= 0) {
-    listings[idx] = listing;
-  } else {
-    listings.push(listing);
-  }
-  localStorage.setItem(LISTINGS_KEY, JSON.stringify(listings));
-  return listing;
-}
-
-export function updateListing(slug: string, data: Partial<AdminLandListing>): AdminLandListing | undefined {
-  const listings = getListings();
-  const idx = listings.findIndex((l) => l.slug === slug);
-  if (idx < 0) return undefined;
-  listings[idx] = { ...listings[idx], ...data };
-  localStorage.setItem(LISTINGS_KEY, JSON.stringify(listings));
-  return listings[idx];
-}
-
-export function deleteListing(slug: string) {
-  const listings = getListings().filter((l) => l.slug !== slug);
-  localStorage.setItem(LISTINGS_KEY, JSON.stringify(listings));
-}
-
-export function seedListings(
-  items: Array<{ name: string; location: string; priceLow: string; priceHigh: string; description: string[]; features: string[]; images: string[] }>
-) {
-  const existing = getListings();
-  const existingSlugs = new Set(existing.map((l) => l.slug));
-  let count = 0;
-  for (const item of items) {
-    const slug = slugify(item.name);
-    if (!existingSlugs.has(slug)) {
-      existing.push({ ...item, slug });
-      existingSlugs.add(slug);
-      count++;
+export async function getListings(): Promise<AdminLandListing[]> {
+  try {
+    const res = await fetch("/api/listings");
+    if (!res.ok) {
+      console.error("getListings failed:", res.status, await res.text());
+      return [];
     }
+    const data = await res.json();
+    return data.map(mapRow);
+  } catch (err) {
+    console.error("getListings error:", err);
+    return [];
   }
-  if (count > 0) localStorage.setItem(LISTINGS_KEY, JSON.stringify(existing));
-  return count;
+}
+
+export async function getListingBySlug(slug: string): Promise<AdminLandListing | undefined> {
+  try {
+    const res = await fetch(`/api/listings/${encodeURIComponent(slug)}`);
+    if (res.status === 404) return undefined;
+    if (!res.ok) {
+      console.error("getListingBySlug failed:", res.status, await res.text());
+      return undefined;
+    }
+    return mapRow(await res.json());
+  } catch (err) {
+    console.error("getListingBySlug error:", err);
+    return undefined;
+  }
+}
+
+export async function saveListing(data: Omit<AdminLandListing, "slug">): Promise<AdminLandListing | null> {
+  try {
+    const res = await fetch("/api/listings", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data),
+    });
+    if (!res.ok) {
+      console.error("saveListing failed:", res.status, await res.text());
+      return null;
+    }
+    return mapRow(await res.json());
+  } catch (err) {
+    console.error("saveListing error:", err);
+    return null;
+  }
+}
+
+export async function updateListing(slug: string, data: Partial<AdminLandListing>): Promise<AdminLandListing | null> {
+  try {
+    const res = await fetch(`/api/listings/${encodeURIComponent(slug)}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data),
+    });
+    if (!res.ok) {
+      console.error("updateListing failed:", res.status, await res.text());
+      return null;
+    }
+    return mapRow(await res.json());
+  } catch (err) {
+    console.error("updateListing error:", err);
+    return null;
+  }
+}
+
+export async function deleteListing(slug: string): Promise<boolean> {
+  try {
+    const res = await fetch("/api/listings", {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ slug }),
+    });
+    if (!res.ok) console.error("deleteListing failed:", res.status, await res.text());
+    return res.ok;
+  } catch (err) {
+    console.error("deleteListing error:", err);
+    return false;
+  }
 }
 
 export async function getGalleryImages(): Promise<GalleryImage[]> {

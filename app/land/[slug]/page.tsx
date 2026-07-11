@@ -5,31 +5,16 @@ import { useParams } from "next/navigation";
 import Link from "next/link";
 import Section from "@/components/Section";
 import Gallery from "@/components/Gallery";
-import { contact, landListings, LandListing } from "@/lib/data";
+import { contact } from "@/lib/data";
 import { getListings, AdminLandListing } from "@/lib/admin-store";
 
 export default function LandDetailPage() {
   const params = useParams<{ slug: string }>();
-  const [adminListings, setAdminListings] = useState<AdminLandListing[]>([]);
+  const [allListings, setAllListings] = useState<AdminLandListing[]>([]);
 
   useEffect(() => {
-    setAdminListings(getListings());
+    getListings().then(setAllListings);
   }, []);
-
-  const allListings: LandListing[] = useMemo(() => {
-    const staticSlugs = new Set(landListings.map((l) => l.slug));
-    const extra: LandListing[] = adminListings
-      .filter((l) => !staticSlugs.has(l.slug))
-      .map((l) => ({
-        ...l,
-        type: "Residential",
-        status: "Available",
-        titleType: "Freehold",
-        plotSize: "—",
-        priceValue: 0,
-      }));
-    return [...landListings, ...extra];
-  }, [adminListings]);
 
   const listing = allListings.find((l) => l.slug === params.slug) ?? null;
   const otherListings = listing
@@ -74,10 +59,14 @@ export default function LandDetailPage() {
       </section>
 
       <section className="mx-auto flex max-w-full flex-col items-center px-4 sm:px-6 py-10 lg:px-8">
-        <Gallery images={listing.images} alt={listing.name} />
+        <div className="flex w-full max-w-6xl flex-col gap-10 md:flex-row md:items-start">
+          <div className="w-full md:w-3/5">
+            <Gallery images={listing.images} alt={listing.name} />
+          </div>
 
-        <div className="mt-8 w-full max-w-2xl space-y-6">
-          <div className="neu-raised space-y-4 p-7">
+          <div className="w-full md:w-2/5 md:sticky md:top-[calc(var(--nav-h)+1rem)]">
+            <div className="space-y-6">
+              <div className="neu-raised space-y-4 p-7">
             {listing.description.map((paragraph, i) => (
               <p key={i} className="text-sm leading-relaxed text-mist">
                 {paragraph}
@@ -108,7 +97,9 @@ export default function LandDetailPage() {
             >
               Use the contact form instead
             </Link>
+            </div>
           </div>
+        </div>
         </div>
       </section>
 
@@ -116,7 +107,13 @@ export default function LandDetailPage() {
         <Section eyebrow="More estates" title="Other land available" className="pt-4!">
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {otherListings.map((l) => (
-              <Link key={l.slug} href={`/land/${l.slug}`} className="neu-card block p-6">
+              <Link key={l.slug} href={`/land/${l.slug}`} className="neu-card block overflow-hidden">
+                {l.images[0] && (
+                  <div className="aspect-[4/3] w-full overflow-hidden">
+                    <img src={l.images[0]} alt={l.name} className="h-full w-full object-cover" />
+                  </div>
+                )}
+                <div className="p-6">
                 <p className="text-xs font-semibold uppercase tracking-wide text-gold">
                   {l.location}
                 </p>
@@ -124,6 +121,7 @@ export default function LandDetailPage() {
                 <p className="mt-3 font-display text-2xl text-red">
                   {l.priceLow} – {l.priceHigh}
                 </p>
+                </div>
               </Link>
             ))}
           </div>

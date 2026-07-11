@@ -5,37 +5,22 @@ import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import Section from "@/components/Section";
 import ListingCard from "@/components/ListingCard";
-import { contact, landListings, LandListing } from "@/lib/data";
-import { getListings, AdminLandListing } from "@/lib/admin-store";
+import { contact } from "@/lib/data";
+import { getListings as getListingsFromAPI, AdminLandListing } from "@/lib/admin-store";
 
 const types = ["Residential", "Commercial", "Mixed-Use", "Farmland"];
 
 function LandPageContent() {
   const searchParams = useSearchParams();
-  const [adminListings, setAdminListings] = useState<AdminLandListing[]>([]);
+  const [allListings, setAllListings] = useState<AdminLandListing[]>([]);
 
   const [location, setLocation] = useState(searchParams.get("location") ?? "");
   const [type, setType] = useState(searchParams.get("type") ?? "");
   const [sort, setSort] = useState<"default" | "price-asc" | "price-desc">("default");
 
   useEffect(() => {
-    setAdminListings(getListings());
+    getListingsFromAPI().then(setAllListings);
   }, []);
-
-  const allListings: LandListing[] = useMemo(() => {
-    const staticSlugs = new Set(landListings.map((l) => l.slug));
-    const extra: LandListing[] = adminListings
-      .filter((l) => !staticSlugs.has(l.slug))
-      .map((l) => ({
-        ...l,
-        type: "Residential",
-        status: "Available",
-        titleType: "Freehold",
-        plotSize: "—",
-        priceValue: 0,
-      }));
-    return [...landListings, ...extra];
-  }, [adminListings]);
 
   const locations = useMemo(
     () => Array.from(new Set(allListings.map((l) => l.location))),

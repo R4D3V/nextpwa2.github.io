@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import Image from "next/image";
 
 export default function Gallery({ images, alt }: { images: string[]; alt: string }) {
   const [active, setActive] = useState(0);
@@ -9,13 +8,10 @@ export default function Gallery({ images, alt }: { images: string[]; alt: string
   return (
     <div>
       <div className="neu-card relative aspect-[4/3] w-full overflow-hidden">
-        <Image
+        <img
           src={images[active]}
           alt={`${alt} — photo ${active + 1}`}
-          fill
-          sizes="(min-width: 1024px) 640px, 100vw"
-          className="object-cover"
-          priority={active === 0}
+          className="h-full w-full object-cover"
         />
 
         {images.length > 1 && (
@@ -55,12 +51,10 @@ export default function Gallery({ images, alt }: { images: string[]; alt: string
                 i === active ? "neu-pressed" : "neu-raised-sm opacity-80 hover:opacity-100"
               }`}
             >
-              <Image
+              <img
                 src={src}
                 alt={`${alt} thumbnail ${i + 1}`}
-                fill
-                sizes="120px"
-                className="object-cover"
+                className="h-full w-full object-cover"
               />
             </button>
           ))}

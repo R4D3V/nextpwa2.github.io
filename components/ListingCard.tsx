@@ -5,13 +5,13 @@ import Image from "next/image";
 import type { LandListing } from "@/lib/data";
 import { contact } from "@/lib/data";
 
-const statusStyles: Record<LandListing["status"], string> = {
+const statusStyles: Record<string, string> = {
   Available: "bg-red/10 text-red border-red/30",
   "Selling Fast": "bg-gold/10 text-gold border-gold/30",
   "Few Plots Left": "bg-gold/10 text-gold border-gold/30",
 };
 
-export default function ListingCard({ listing }: { listing: LandListing }) {
+export default function ListingCard({ listing }: { listing: LandListing | { slug: string; name: string; location: string; type: string; status: string; titleType: string; plotSize: string; priceLow: string; priceHigh: string; images: string[]; description: string[]; features: string[] } }) {
   const whatsappHref = `https://wa.me/${contact.phoneDigits}?text=${encodeURIComponent(
     `Hi Frank Realtors, I'm interested in ${listing.name} (${listing.priceLow} - ${listing.priceHigh}).`
   )}`;

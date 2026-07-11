@@ -5,15 +5,24 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { saveListing } from "@/lib/admin-store";
 
+const PLOT_TYPES = ["Residential", "Commercial", "Mixed-Use", "Farmland"];
+const STATUS_OPTIONS = ["Available", "Selling Fast", "Few Plots Left"];
+const TITLE_OPTIONS = ["Freehold", "Mailo", "Leasehold"];
+
 export default function NewListingPage() {
   const router = useRouter();
   const [name, setName] = useState("");
   const [location, setLocation] = useState("");
+  const [type, setType] = useState("Residential");
+  const [status, setStatus] = useState("Available");
+  const [titleType, setTitleType] = useState("Freehold");
+  const [plotSize, setPlotSize] = useState("");
   const [priceLow, setPriceLow] = useState("");
   const [priceHigh, setPriceHigh] = useState("");
   const [description, setDescription] = useState("");
   const [featuresText, setFeaturesText] = useState("");
   const [images, setImages] = useState<string[]>(["", "", "", "", ""]);
+  const [featured, setFeatured] = useState(false);
   const [loading, setLoading] = useState(false);
 
   function handleImageUpload(index: number, file: File | null) {
@@ -27,7 +36,7 @@ export default function NewListingPage() {
     reader.readAsDataURL(file);
   }
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!name || !location || !priceLow || !priceHigh) return;
     setLoading(true);
@@ -43,12 +52,20 @@ export default function NewListingPage() {
       .filter(Boolean);
 
     const filledImages = images.filter(Boolean);
+    const numericLow = parseFloat(priceLow.replace(/[^0-9.]/g, ""));
+    const priceValue = isNaN(numericLow) ? 0 : numericLow * (priceLow.includes("M") ? 1000000 : 1);
 
-    saveListing({
+    await saveListing({
       name,
       location,
+      type,
+      status,
+      titleType,
+      plotSize: plotSize || "—",
       priceLow,
       priceHigh,
+      priceValue,
+      featured,
       description: desc.length ? desc : [description || `${name} — land available in ${location}.`],
       features: features.length ? features : ["Surveyed & pegged boundaries", "Ready title processing", "Access road to the plot", "Flexible installment plans", "Verified ownership documentation"],
       images: filledImages,
@@ -106,6 +123,62 @@ export default function NewListingPage() {
               placeholder="e.g. 8M"
               required
             />
+          </div>
+          <div>
+            <label className="text-xs font-semibold uppercase tracking-wide text-mist">Type</label>
+            <select
+              value={type}
+              onChange={(e) => setType(e.target.value)}
+              className="neu-pressed mt-1 w-full rounded-xl px-4 py-3 text-sm text-navy outline-none"
+            >
+              {PLOT_TYPES.map((t) => (
+                <option key={t} value={t}>{t}</option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label className="text-xs font-semibold uppercase tracking-wide text-mist">Status</label>
+            <select
+              value={status}
+              onChange={(e) => setStatus(e.target.value)}
+              className="neu-pressed mt-1 w-full rounded-xl px-4 py-3 text-sm text-navy outline-none"
+            >
+              {STATUS_OPTIONS.map((s) => (
+                <option key={s} value={s}>{s}</option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label className="text-xs font-semibold uppercase tracking-wide text-mist">Title Type</label>
+            <select
+              value={titleType}
+              onChange={(e) => setTitleType(e.target.value)}
+              className="neu-pressed mt-1 w-full rounded-xl px-4 py-3 text-sm text-navy outline-none"
+            >
+              {TITLE_OPTIONS.map((t) => (
+                <option key={t} value={t}>{t}</option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label className="text-xs font-semibold uppercase tracking-wide text-mist">Plot Size</label>
+            <input
+              value={plotSize}
+              onChange={(e) => setPlotSize(e.target.value)}
+              className="neu-pressed mt-1 w-full rounded-xl px-4 py-3 text-sm text-navy outline-none"
+              placeholder="e.g. 50x100 ft"
+            />
+          </div>
+          <div className="flex items-end pb-3">
+            <label className="flex items-center gap-2 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={featured}
+                onChange={(e) => setFeatured(e.target.checked)}
+                className="h-5 w-5 rounded accent-red"
+              />
+              <span className="text-xs font-semibold uppercase tracking-wide text-mist">Featured</span>
+            </label>
           </div>
         </div>
 
