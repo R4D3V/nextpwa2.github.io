@@ -97,7 +97,7 @@ export default function Home() {
             </h1>
             <p className="mx-auto mt-6 max-w-xl text-balance text-lg leading-relaxed text-mist">
               Frank Realtors develops, surveys, documents, and sells land across
-              Wakiso and Mpigi — with estates around Entebbe, and installment
+              Wakiso and Entebbe — with estates around Entebbe, and installment
               payments on every plot.
             </p>
 
