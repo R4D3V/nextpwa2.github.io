@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { Suspense, useState, useEffect, useMemo } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import Section from "@/components/Section";
@@ -10,7 +10,7 @@ import { getListings, AdminLandListing } from "@/lib/admin-store";
 
 const types = ["Residential", "Commercial", "Mixed-Use", "Farmland"];
 
-export default function LandPage() {
+function LandPageContent() {
   const searchParams = useSearchParams();
   const [adminListings, setAdminListings] = useState<AdminLandListing[]>([]);
 
@@ -146,5 +146,13 @@ export default function LandPage() {
         </div>
       </Section>
     </>
+  );
+}
+
+export default function LandPage() {
+  return (
+    <Suspense fallback={<div className="pt-[calc(var(--nav-h)+1rem)] text-center text-sm text-mist">Loading...</div>}>
+      <LandPageContent />
+    </Suspense>
   );
 }
