@@ -158,7 +158,7 @@ export default async function Home() {
       </Section>
 
       {/* Agents / team */}
-      <Section
+      {/* <Section
         eyebrow="The team"
         title="Talk to a Frank Realtors agent"
         intro="Reach out directly on WhatsApp or by phone — every agent below can walk you through current listings and pricing."
@@ -201,7 +201,7 @@ export default async function Home() {
             </Reveal>
           ))}
         </div>
-      </Section>
+      </Section> */}
 
       {/* Testimonials */}
       <Section
