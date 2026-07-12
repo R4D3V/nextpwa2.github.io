@@ -15,7 +15,10 @@ export default function AdminDashboard() {
 
   return (
     <div className="mx-auto flex max-w-full flex-col items-center px-4 sm:px-6 pb-10 pt-[calc(var(--nav-h)+2rem)] text-center lg:px-8">
-      <h1 className="font-display text-4xl text-navy">Dashboard</h1>
+      <Link href="/" className="text-sm font-medium text-mist transition hover:text-red">
+        ← Back to site
+      </Link>
+      <h1 className="mt-4 font-display text-4xl text-navy">Dashboard</h1>
       <p className="mt-2 text-sm text-mist">Manage your land listings and gallery images.</p>
 
       <div className="mt-10 grid w-full max-w-2xl gap-6 sm:grid-cols-2">

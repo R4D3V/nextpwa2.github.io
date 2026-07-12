@@ -1,17 +1,19 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Link from "next/link";
 import { getGalleryImages, addGalleryImage, deleteGalleryImage, GalleryImage } from "@/lib/admin-store";
 
 export default function AdminGalleryPage() {
   const [images, setImages] = useState<GalleryImage[]>([]);
+  const [loading, setLoading] = useState(true);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
 
   useEffect(() => {
-    getGalleryImages().then(setImages);
+    getGalleryImages().then((imgs) => { setImages(imgs); setLoading(false); });
   }, []);
 
   function handleFileChange(f: File | null) {
@@ -44,7 +46,10 @@ export default function AdminGalleryPage() {
 
   return (
     <div className="mx-auto flex max-w-full flex-col items-center px-4 sm:px-6 py-10 text-center lg:px-8">
-      <h1 className="font-display text-4xl text-navy">Gallery</h1>
+      <Link href="/admin" className="text-sm font-medium text-mist transition hover:text-red">
+        ← Dashboard
+      </Link>
+      <h1 className="mt-4 font-display text-4xl text-navy">Gallery</h1>
       <p className="mt-2 text-sm text-mist">Upload images to showcase your work.</p>
 
       <div className="neu-card mt-8 w-full max-w-2xl p-6 text-left">
@@ -100,32 +105,45 @@ export default function AdminGalleryPage() {
         </button>
       </div>
 
-      {images.length === 0 && (
+      {loading ? (
+        <div className="mt-8 grid w-full max-w-5xl gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          {[1, 2, 3, 4, 5, 6].map((i) => (
+            <div key={i} className="neu-card overflow-hidden">
+              <div className="aspect-[4/3] w-full animate-pulse bg-base-light" />
+              <div className="p-4">
+                <div className="h-4 w-32 animate-pulse rounded bg-base-light" />
+                <div className="mt-2 h-3 w-48 animate-pulse rounded bg-base-light" />
+                <div className="neu-btn mt-3 h-8 w-full animate-pulse opacity-50" />
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : images.length === 0 ? (
         <div className="neu-card mt-8 p-10 text-center">
           <p className="text-mist">No gallery images yet.</p>
         </div>
+      ) : (
+        <div className="mt-8 grid w-full max-w-5xl gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          {images.map((img) => (
+            <div key={img.id} className="neu-card overflow-hidden">
+              <div className="relative aspect-[4/3] w-full">
+                <img src={img.image} alt={img.title} className="h-full w-full object-cover" />
+              </div>
+              <div className="p-4">
+                <h3 className="text-sm font-semibold text-navy">{img.title}</h3>
+                {img.description && <p className="mt-1 text-xs text-mist">{img.description}</p>}
+                <p className="mt-1 text-[10px] text-mist/50">{new Date(img.createdAt).toLocaleDateString()}</p>
+                <button
+                  onClick={() => handleDelete(img.id)}
+                  className="neu-btn mt-3 w-full px-4 py-2 text-xs font-semibold text-red"
+                >
+                  Delete
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
       )}
-
-      <div className="mt-8 grid w-full max-w-5xl gap-6 sm:grid-cols-2 lg:grid-cols-3">
-        {images.map((img) => (
-          <div key={img.id} className="neu-card overflow-hidden">
-            <div className="relative aspect-[4/3] w-full">
-              <img src={img.image} alt={img.title} className="h-full w-full object-cover" />
-            </div>
-            <div className="p-4">
-              <h3 className="text-sm font-semibold text-navy">{img.title}</h3>
-              {img.description && <p className="mt-1 text-xs text-mist">{img.description}</p>}
-              <p className="mt-1 text-[10px] text-mist/50">{new Date(img.createdAt).toLocaleDateString()}</p>
-              <button
-                onClick={() => handleDelete(img.id)}
-                className="neu-btn mt-3 w-full px-4 py-2 text-xs font-semibold text-red"
-              >
-                Delete
-              </button>
-            </div>
-          </div>
-        ))}
-      </div>
     </div>
   );
 }
