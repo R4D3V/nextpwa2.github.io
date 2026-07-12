@@ -95,3 +95,26 @@ export async function getLocationSummaries(): Promise<{ location: string; count:
   `;
   return rows.map((r) => ({ location: r.location as string, count: r.count as number }));
 }
+
+export type GalleryImage = {
+  id: string;
+  title: string;
+  description: string;
+  image: string;
+  createdAt: string;
+};
+
+export async function getGalleryImages(): Promise<GalleryImage[]> {
+  const rows = await sql`
+    SELECT id, title, description, image, created_at
+    FROM gallery_images
+    ORDER BY created_at DESC
+  `;
+  return rows.map((r) => ({
+    id: r.id as string,
+    title: r.title as string,
+    description: r.description as string,
+    image: r.image as string,
+    createdAt: r.created_at as string,
+  }));
+}
