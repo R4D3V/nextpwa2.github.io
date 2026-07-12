@@ -1,25 +1,18 @@
-"use client";
-
-import { useState, useEffect, useMemo } from "react";
-import { useParams } from "next/navigation";
 import Link from "next/link";
-import Section from "@/components/Section";
 import Gallery from "@/components/Gallery";
 import { contact } from "@/lib/data";
-import { getListings, AdminLandListing } from "@/lib/admin-store";
+import { getListingBySlug, getOtherListings } from "@/lib/queries";
 
-export default function LandDetailPage() {
-  const params = useParams<{ slug: string }>();
-  const [allListings, setAllListings] = useState<AdminLandListing[]>([]);
-
-  useEffect(() => {
-    getListings().then(setAllListings);
-  }, []);
-
-  const listing = allListings.find((l) => l.slug === params.slug) ?? null;
-  const otherListings = listing
-    ? allListings.filter((l) => l.slug !== listing.slug).slice(0, 3)
-    : [];
+export default async function LandDetailPage({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}) {
+  const { slug } = await params;
+  const [listing, otherListings] = await Promise.all([
+    getListingBySlug(slug),
+    getOtherListings(slug, 3),
+  ]);
 
   if (!listing) {
     return (
@@ -104,8 +97,14 @@ export default function LandDetailPage() {
       </section>
 
       {otherListings.length > 0 && (
-        <Section eyebrow="More estates" title="Other land available" className="pt-4!">
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        <section className="mx-auto flex max-w-full flex-col items-center px-4 sm:px-6 py-16 lg:px-8 sm:py-20">
+          <div className="mb-12 max-w-2xl text-center">
+            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-gold">
+              More estates
+            </p>
+            <h2 className="mt-3 font-display text-4xl text-navy sm:text-5xl">Other land available</h2>
+          </div>
+          <div className="w-full grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {otherListings.map((l) => (
               <Link key={l.slug} href={`/land/${l.slug}`} className="neu-card block overflow-hidden">
                 {l.images[0] && (
@@ -125,7 +124,7 @@ export default function LandDetailPage() {
               </Link>
             ))}
           </div>
-        </Section>
+        </section>
       )}
     </>
   );

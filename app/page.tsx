@@ -1,11 +1,8 @@
-"use client";
-
-import { useState, useEffect } from "react";
 import Link from "next/link";
 import Section from "@/components/Section";
 import ServiceCard from "@/components/ServiceCard";
 import ListingCard from "@/components/ListingCard";
-import PropertySearch from "@/components/PropertySearch";
+import HeroTypewriter from "@/components/HeroTypewriter";
 import Reveal from "@/components/Reveal";
 import {
   services,
@@ -15,61 +12,13 @@ import {
   stats,
   whyChooseUs,
 } from "@/lib/data";
-import { getListings, AdminLandListing } from "@/lib/admin-store";
+import { getFeaturedListings, getLocationSummaries } from "@/lib/queries";
 
-const phrases = [
-  "Best Deals",
-  "Best Offers",
-  "Pure Commitment",
-  "Best Service",
-];
-
-export default function Home() {
-  const [featuredLand, setFeaturedLand] = useState<AdminLandListing[]>([]);
-  const [locations, setLocations] = useState<
-    { location: string; count: number }[]
-  >([]);
-  const [phraseIndex, setPhraseIndex] = useState(0);
-  const [charIndex, setCharIndex] = useState(0);
-  const [deleting, setDeleting] = useState(false);
-
-  useEffect(() => {
-    const current = phrases[phraseIndex];
-    const timeout = deleting ? 50 : 100;
-
-    if (!deleting && charIndex === current.length) {
-      setTimeout(() => setDeleting(true), 2000);
-      return;
-    }
-
-    if (deleting && charIndex === 0) {
-      setDeleting(false);
-      setPhraseIndex((i) => (i + 1) % phrases.length);
-      return;
-    }
-
-    const timer = setTimeout(() => {
-      setCharIndex((i) => (deleting ? i - 1 : i + 1));
-    }, timeout);
-
-    return () => clearTimeout(timer);
-  }, [charIndex, deleting, phraseIndex]);
-
-  useEffect(() => {
-    getListings().then((listings) => {
-      setFeaturedLand(listings.filter((l) => l.featured));
-      const map = new Map<string, number>();
-      for (const l of listings) {
-        map.set(l.location, (map.get(l.location) ?? 0) + 1);
-      }
-      setLocations(
-        Array.from(map.entries()).map(([location, count]) => ({
-          location,
-          count,
-        })),
-      );
-    });
-  }, []);
+export default async function Home() {
+  const [featuredLand, locationSummaries] = await Promise.all([
+    getFeaturedListings(),
+    getLocationSummaries(),
+  ]);
 
   return (
     <>
@@ -89,11 +38,7 @@ export default function Home() {
               Land services · {contact.location}
             </p>
             <h1 className="mt-6 font-display text-4xl leading-[1.05] text-navy sm:text-6xl lg:text-7xl">
-              {/* <span className="text-red">Realtors</span>{" "} */}
-              <span className="inline-block min-w-[6ch] text-left">
-                {phrases[phraseIndex].slice(0, charIndex)}
-                <span className="animate-pulse">|</span>
-              </span>
+              <HeroTypewriter />
             </h1>
             <p className="mx-auto mt-6 max-w-xl text-balance text-lg leading-relaxed text-mist">
               Frank Realtors develops, surveys, documents, and sells land across
@@ -172,7 +117,7 @@ export default function Home() {
         intro="Every estate is grouped by the trading centre or road it sits nearest to — pick an area to see what's on offer there."
       >
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
-          {locations.map((loc, i) => (
+          {locationSummaries.map((loc, i) => (
             <Reveal key={loc.location} delay={i * 50}>
               <Link
                 href={`/land?location=${encodeURIComponent(loc.location)}`}
